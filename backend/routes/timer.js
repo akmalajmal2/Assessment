@@ -1,36 +1,84 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const { v4: uuidv4 } = require("uuid");
+const logEvent = require("../utils/logger");
 
+const TEST_DURATION = 1800;
+const WARNING_AT = 300;
+
+// START / RESUME
 router.post("/start", async (req, res) => {
-  const { attemptId, duration } = req.body;
-  const safeDuration = Number(duration) || 1800;
-  const endTime = new Date(Date.now() + safeDuration * 1000);
+  try {
+    let { attemptId } = req.body;
 
-  await db.query(
-    "INSERT INTO assessment_timer(attempt_id,end_time,status) VALUES($1,$2,$3)",
-    [attemptId, endTime, "RUNNING"],
-  );
+    if (!attemptId) attemptId = "ATT_" + uuidv4();
 
-  res.json({ endTime });
+    const existing = await db.query(
+      "SELECT status,end_time FROM assessment_timer WHERE attempt_id=$1",
+      [attemptId],
+    );
+
+    if (existing.rows.length && existing.rows[0].status === "SUBMITTED") {
+      return res.status(403).json({ message: "Assessment completed" });
+    }
+
+    if (existing.rows.length) {
+      return res.json({
+        attemptId,
+        endTime: existing.rows[0].end_time,
+        warningAt: WARNING_AT,
+      });
+    }
+
+    const endTime = new Date(Date.now() + TEST_DURATION * 1000);
+
+    await db.query(
+      "INSERT INTO assessment_timer(attempt_id,end_time,status) VALUES($1,$2,'RUNNING')",
+      [attemptId, endTime],
+    );
+
+    await logEvent({
+      attemptId,
+      action: "STARTED",
+      message: "Assessment started",
+    });
+
+    res.json({ attemptId, endTime, warningAt: WARNING_AT });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
 });
 
-router.get("/state/:attemptId", async (req, res) => {
-  const result = await db.query(
-    "SELECT end_time,status FROM assessment_timer WHERE attempt_id=$1",
-    [req.params.attemptId],
-  );
+// WARNING LOG
+router.post("/warning", async (req, res) => {
+  const { attemptId } = req.body;
 
-  if (!result.length) return res.statusCode(404);
-
-  const remaining = new Date(rows[0].end_time).getTime() - Date.now();
-
-  res.json({
-    remaining: Math.max(0, Math.floor(remaining / 1000)),
-    status: rows[0].status,
+  await logEvent({
+    attemptId,
+    action: "WARNING",
+    message: "5 minute warning",
   });
+
+  res.sendStatus(200);
 });
 
+// QUESTION ATTEMPT
+router.post("/question", async (req, res) => {
+  const { attemptId, questionId } = req.body;
+
+  await logEvent({
+    attemptId,
+    questionId,
+    action: "QUESTION_ATTEMPT",
+    message: `Question ${questionId} attempted`,
+  });
+
+  res.sendStatus(200);
+});
+
+// SUBMIT
 router.post("/submit", async (req, res) => {
   const { attemptId } = req.body;
 
@@ -39,7 +87,23 @@ router.post("/submit", async (req, res) => {
     [attemptId],
   );
 
-  res.sendStatus(200);
+  await logEvent({
+    attemptId,
+    action: "COMPLETED",
+    message: "Assessment submitted",
+  });
+
+  res.json({ success: true });
+});
+
+// GET LOGS
+router.get("/logs/:attemptId", async (req, res) => {
+  const logs = await db.query(
+    "SELECT * FROM assessment_logs WHERE attempt_id=$1 ORDER BY created_at",
+    [req.params.attemptId],
+  );
+
+  res.json(logs.rows);
 });
 
 module.exports = router;

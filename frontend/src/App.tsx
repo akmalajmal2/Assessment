@@ -1,8 +1,8 @@
-import AssessmentPage from "./page/AssessmentPage";
+import AssessmentPage from "./pages/AssessmentPage";
 
 function App() {
   return (
-    <div>
+    <div className="w-ful h-screen bg-gray-100">
       <AssessmentPage />
     </div>
   );

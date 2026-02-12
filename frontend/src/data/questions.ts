@@ -11,4 +11,14 @@ export const QUESTIONS = [
     options: ["Hook", "Component", "API"],
     correct: "Hook",
   },
+  {
+    id: "Q3",
+    text: "UseEffect used for",
+    options: [
+      "render the component",
+      "render the page",
+      "render the complete application",
+    ],
+    correct: "render the component",
+  },
 ];
