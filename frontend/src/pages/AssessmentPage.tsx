@@ -262,7 +262,11 @@ export default function AssessmentPage() {
             <div key={log.id}>
               <strong>{log.action}</strong> - {log.message}
               <br />
-              <small>{new Date(log.created_at).toLocaleString()}</small>
+              <small>
+                {new Date(log.created_at).toLocaleString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                })}
+              </small>
               <hr />
             </div>
           ))}
