@@ -1,15 +1,9 @@
-import Timer from "./components/EnforcedTimer";
+import AssessmentPage from "./page/AssessmentPage";
 
 function App() {
-  const handleTimeUp = () => {};
-
   return (
     <div>
-      <header>
-        <h2>Welcome to the Assessment </h2>
-        <p>There are total</p>
-      </header>
-      <Timer duration={durationInMinutes} onTimeUp={handleTimeUp} />
+      <AssessmentPage />
     </div>
   );
 }
