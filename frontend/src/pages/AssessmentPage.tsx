@@ -80,6 +80,8 @@ export default function AssessmentPage() {
     setWarningAt(data.warningAt);
     setStarted(true);
     setCompleted(false);
+    setLogs([]);
+    setCurrentIndex(0);
     warningSent.current = false;
   };
 

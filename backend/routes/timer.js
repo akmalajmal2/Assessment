@@ -3,9 +3,10 @@ const router = express.Router();
 const db = require("../db");
 const { v4: uuidv4 } = require("uuid");
 const logEvent = require("../utils/logger");
+const CONFIG = require("../config/assessmentConfig");
 
-const TEST_DURATION = 1800;
-const WARNING_AT = 300;
+const TEST_DURATION = CONFIG[TEST_DURATION];
+const WARNING_AT = CONFIG[WARNING_AT];
 
 // START / RESUME
 router.post("/start", async (req, res) => {
