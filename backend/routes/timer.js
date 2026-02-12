@@ -5,8 +5,10 @@ const { v4: uuidv4 } = require("uuid");
 const logEvent = require("../utils/logger");
 const CONFIG = require("../config/assessmentConfig");
 
-const TEST_DURATION = CONFIG[TEST_DURATION];
-const WARNING_AT = CONFIG[WARNING_AT];
+const TEST_DURATION = CONFIG.TEST_DURATION;
+const WARNING_AT = CONFIG.WARNING_AT;
+
+console.log("testing", TEST_DURATION);
 
 // START / RESUME
 router.post("/start", async (req, res) => {
