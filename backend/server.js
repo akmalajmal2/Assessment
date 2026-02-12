@@ -1,12 +1,12 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
 app.use(
   cors({
-    origin:
-      "https://assessment-gray-nine.vercel.app/" || "http://localhost:5173",
+    origin: process.env.FRONTEND_API_URL || "http://localhost:5173",
     credentials: true,
   }),
 );
