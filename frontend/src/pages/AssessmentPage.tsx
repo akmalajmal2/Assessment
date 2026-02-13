@@ -55,7 +55,7 @@ export default function AssessmentPage() {
         warningSent.current = true;
       }
 
-      if (seconds <= 0) {
+      if (seconds <= 0 && started) {
         handleSubmit();
       }
     }, 1000);
@@ -82,6 +82,8 @@ export default function AssessmentPage() {
     setCompleted(false);
     setLogs([]);
     setCurrentIndex(0);
+    setAnswers({});
+    setRemaining(0);
     warningSent.current = false;
   };
 
@@ -245,10 +247,16 @@ export default function AssessmentPage() {
             </button>
 
             <button
-              className="px-7 py-2.5 bg-green-400 rounded-sm text-white w-fit ml-auto text-xl font-semibold leading-none hover:bg-green-500 hover:scale-105 active:scale-95 cursor-pointer mt-0.5 disabled:bg-gray-400 disabled:cursor-default w-fit"
+              className="px-7 py-2.5 bg-green-400 rounded-sm text-white ml-auto text-xl font-semibold leading-none hover:bg-green-500 hover:scale-105 active:scale-95 cursor-pointer mt-0.5 disabled:bg-gray-400 disabled:cursor-default w-fit mr-6"
               onClick={loadLogs}
             >
               View Logs
+            </button>
+            <button
+              className="bg-blue-400 hover:bg-blue-500 hover:scale-105 active:scale-95 px-6 py-3 leading-none rounded-3xl text-white font-semibold text-lg md:text-xl lg:text-2xl cursor-pointer w-fit mr-6"
+              onClick={() => window.location.reload()}
+            >
+              Go to Home
             </button>
           </div>
         </>
