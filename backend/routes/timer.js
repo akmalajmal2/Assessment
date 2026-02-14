@@ -8,8 +8,6 @@ const CONFIG = require("../config/assessmentConfig");
 const TEST_DURATION = CONFIG.TEST_DURATION;
 const WARNING_AT = CONFIG.WARNING_AT;
 
-console.log("testing", TEST_DURATION);
-
 // START / RESUME
 router.post("/start", async (req, res) => {
   try {
@@ -107,6 +105,17 @@ router.get("/logs/:attemptId", async (req, res) => {
   );
 
   res.json(logs.rows);
+});
+
+router.get("/state/:attemptId", async (req, res) => {
+  const answers = await db.query(
+    "SELECT question_id FROM assessment_answers WHERE attempt_id=$1",
+    [req.params.attemptId],
+  );
+
+  res.json({
+    currentIndex: answers.rows.length,
+  });
 });
 
 module.exports = router;

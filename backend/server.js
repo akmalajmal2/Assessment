@@ -16,6 +16,8 @@ app.use(
 
 app.use(express.json());
 app.use("/timer", require("./routes/timer"));
+app.use("/answers", require("./routes/answers"));
+
 app.use("/logs", require("./routes/logs"));
 
 app.listen(5000, () => {

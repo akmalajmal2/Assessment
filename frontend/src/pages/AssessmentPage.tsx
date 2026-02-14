@@ -34,10 +34,35 @@ export default function AssessmentPage() {
 
   // Restore after refresh
   useEffect(() => {
-    const savedAttempt = localStorage.getItem("attemptId");
-    if (savedAttempt) {
-      startTest(savedAttempt);
-    }
+    const restoreSession = async () => {
+      const savedAttempt = localStorage.getItem("attemptId");
+
+      if (!savedAttempt) return;
+
+      // resume timer
+      await startTest(savedAttempt);
+
+      // restore answers
+      const a = await fetch(`${API}/answers/${savedAttempt}`);
+      const answersData = await a.json();
+
+      const restored: Record<string, string> = {};
+      answersData.forEach((x: any) => {
+        restored[x.question_id] = x.answer;
+      });
+
+      setAnswers(restored);
+
+      // restore current question index
+      const s = await fetch(`${API}/timer/state/${savedAttempt}`);
+      const st = await s.json();
+
+      const safeIndex = Math.min(st.currentIndex || 0, QUESTIONS.length - 1);
+
+      setCurrentIndex(safeIndex);
+    };
+
+    restoreSession();
   }, []);
 
   // Countdown effect
@@ -136,8 +161,18 @@ export default function AssessmentPage() {
     setLogs(data);
   };
 
-  const handleAnswer = (value: string) => {
+  const handleAnswer = async (value: string) => {
     setAnswers((prev) => ({ ...prev, [current.id]: value }));
+    await fetch(`${API}/answers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        attemptId,
+        questionId: current.id,
+        answer: value,
+        isCorrect: value === current.correct,
+      }),
+    });
 
     // keep your existing backend logger
     attemptQuestion(current.id);
@@ -189,10 +224,12 @@ export default function AssessmentPage() {
             </h2>
 
             {remaining <= warningAt && remaining > 0 && (
-              <h3 className="text-lg md:text-xl lg:text-2xl font-normal md:font-semibold">
-                <strong className="font-semibold">⚠ Warning:</strong> Only few
-                minutes left!
-              </h3>
+              <div className="px-6 py-1 bg-amber-400 border border-amber-500 rounded-xl">
+                <h3 className="text-lg md:text-lg lg:text-xl font-normal md:font-semibold">
+                  <strong className="font-semibold">⚠ Warning:</strong> Only few
+                  minutes left!
+                </h3>
+              </div>
             )}
           </div>
 
