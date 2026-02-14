@@ -4,12 +4,21 @@ require("dotenv").config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_API_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_API_URL || "http://localhost:5173",
+//     credentials: true,
+//   }),
+// );
+
+cors({
+  origin: [
+    "http://localhost:5173",
+    /\.vercel\.app$/, // allow ALL vercel previews
+  ],
+  credentials: true,
+});
+
 app.use(express.json());
 app.use("/timer", require("./routes/timer"));
 app.use("/logs", require("./routes/logs"));
